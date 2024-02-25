@@ -1,3 +1,0 @@
-rm cc
-./clone.min.lua https://github.com/mateus2k2/CCManager cc
-./cc/main.lua
