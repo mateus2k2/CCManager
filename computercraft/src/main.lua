@@ -50,4 +50,4 @@
 -- GUI TESTE
 --------------------------------------------------------------------------------
 
-shell.run("/CC/computercraft/src/guiTest/menager.lua")
+shell.run("/CC/computercraft/src/tests/guiTest/menager.lua")
