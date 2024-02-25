@@ -1,4 +1,4 @@
 shell.run("clear")
-shell.run("rm", "cc")
-shell.run("./clone.min.lua", "https://github.com/mateus2k2/CCManager", "cc")
-shell.run("./cc/computercraft/src/main.lua")
+shell.run("rm", "CC")
+shell.run("./clone.min.lua", "https://github.com/mateus2k2/CCManager", "CC")
+shell.run("./CC/computercraft/src/main.lua")
