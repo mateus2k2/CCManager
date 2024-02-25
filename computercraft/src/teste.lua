@@ -8,6 +8,8 @@ print(inductionMatrix)
 print(inductionMatrix.getEnergy())
 print(inductionMatrix.getEnergyCapacity())
 
+--TESTE
+
 
 -- local basalt = require("basalt")
 -- local main = basalt.createFrame()
