@@ -1,8 +1,14 @@
-local inductionMatrix = peripheral.wrap("inductionPort_0")
-print(inductionMatrix)
-print(inductionMatrix.getEnergy())
+--------------------------------------------------------------------------------
+-- ENERGY TESTE 
+--------------------------------------------------------------------------------
 
---TESTE
+-- local inductionMatrix = peripheral.wrap("inductionPort_0")
+-- print(inductionMatrix)
+-- print(inductionMatrix.getEnergy())
+
+--------------------------------------------------------------------------------
+-- GUI REDDIT
+--------------------------------------------------------------------------------
 
 -- local basalt = require("basalt")
 -- local main = basalt.createFrame()
@@ -40,3 +46,8 @@ print(inductionMatrix.getEnergy())
 --     os.sleep(0.05)
 -- end
 
+--------------------------------------------------------------------------------
+-- GUI TESTE
+--------------------------------------------------------------------------------
+
+local teste = require("./guiTest/menager")
