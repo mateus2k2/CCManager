@@ -50,4 +50,4 @@
 -- GUI TESTE
 --------------------------------------------------------------------------------
 
-local teste = require("./guiTest/menager")
+local teste = require("/cc/guiTest/menager")
