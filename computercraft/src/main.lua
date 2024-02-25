@@ -1,15 +1,8 @@
--- integrator = peripheral.find("redstoneIntegrator")
--- if integrator == nil then error("not found") end
--- print(integrator.getAnalogInput("north"))
-
-
 local inductionMatrix = peripheral.wrap("inductionPort_0")
 print(inductionMatrix)
 print(inductionMatrix.getEnergy())
-print(inductionMatrix.getEnergyCapacity())
 
 --TESTE
-
 
 -- local basalt = require("basalt")
 -- local main = basalt.createFrame()
