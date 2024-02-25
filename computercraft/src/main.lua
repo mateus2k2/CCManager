@@ -50,4 +50,4 @@
 -- GUI TESTE
 --------------------------------------------------------------------------------
 
-local teste = require("/cc/guiTest/menager")
+shell.run("./guiTest/main.lua")
