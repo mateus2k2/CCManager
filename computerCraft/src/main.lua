@@ -55,8 +55,8 @@ local function getFilesFromGitRepo(repoURL, path)
 end
 
 -- Example usage
-local repoURL = "https://github.com/example/repository"
-local path = "folder/subfolder" -- Specify the path within the repository
+local repoURL = "https://github.com/mateus2k2/CCManager"
+local path = "computerCraft" -- Specify the path within the repository
 local files = getFilesFromGitRepo(repoURL, path)
 
 -- Print the list of files
