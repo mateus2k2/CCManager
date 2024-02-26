@@ -1,3 +1,32 @@
 info.txt
 /node/node_modules/*
 /webUI/node_modules/*
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/webUI/node_modules
+/webUI/.pnp
+/webUI/pnp.js
+
+# testing
+/webUI/coverage
+
+# production
+/webUI/build
+/webUI/out
+/webUI/.next
+
+# misc
+/webUI/.DS_Store
+/webUI/.eslintcache
+/webUI/.idea
+/webUI/.env
+/webUI/.env.local
+/webUI/.env.development.local
+/webUI/.env.test.local
+/webUI/.env.production.local
+
+/webUI/npm-debug.log*
+/webUI/yarn-debug.log*
+/webUI/yarn-error.log*
