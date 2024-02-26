@@ -2,7 +2,7 @@
 -- GERADOR MAIN 
 --------------------------------------------------------------------------------
 
-shell.run("/CC/computercraft/src/GeneratorManager/Generator.lua")
+-- shell.run("/CC/computercraft/src/GeneratorManager/Generator.lua")
 
 --------------------------------------------------------------------------------
 -- GERADOR GUI 
@@ -14,4 +14,4 @@ shell.run("/CC/computercraft/src/GeneratorManager/Generator.lua")
 -- GUI TESTE
 --------------------------------------------------------------------------------
 
--- shell.run("/CC/computercraft/src/tests/guiTest/menager.lua")
+shell.run("/CC/computercraft/src/tests/guiTest/menager.lua")

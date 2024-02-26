@@ -1,2 +1,3 @@
 info.txt
 /node/node_modules/*
+/webUI/node_modules/*

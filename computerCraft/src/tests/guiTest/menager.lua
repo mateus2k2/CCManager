@@ -1,5 +1,5 @@
-local basalt = require("/CC/computercraft/Modules/basalt")
-local debugMenu = require('/CC/computercraft/Modules/basaltDebug'):setBasalt(basalt)
+local basalt = require("/CC/computerCraft/Modules/basalt")
+local debugMenu = require('/CC/computerCraft/Modules/basaltDebug'):setBasalt(basalt)
 
 local lampInteractor = require("lamp")
 
