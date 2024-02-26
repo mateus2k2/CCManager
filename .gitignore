@@ -1,6 +1,7 @@
 info.txt
 /Server/node_modules/*
 /webUI/node_modules/*
+/webUI/*
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
