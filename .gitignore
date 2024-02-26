@@ -1,7 +1,7 @@
 info.txt
 /Server/node_modules/*
 /webUI/node_modules/*
-/webUI/*
+# /webUI/*
 
 # dependencies
 /webUI/node_modules
