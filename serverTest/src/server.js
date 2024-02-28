@@ -1,6 +1,7 @@
 const WebSocket = require('ws');
 
-const ws = new WebSocket('ws://localhost:8586');
+const ws = new WebSocket('ws://sockset.567437965.xyz');
+// const ws = new WebSocket('ws://localhost:8586');
 
 ws.on('open', function open() {
   console.log('Connected to WebSocket server');
