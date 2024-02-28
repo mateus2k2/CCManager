@@ -1,9 +1,8 @@
 const WebSocket = require('ws');
 const readline = require('readline');
 
-const port = 5000;
-// const port = 8586;
-const wss = new WebSocket.Server({ port: port });
+const socketPort = 5000;
+const wss = new WebSocket.Server({ port: socketPort });
 
 wss.on('connection', function connection(ws) {
   console.log('Client connected');
@@ -19,7 +18,7 @@ wss.on('connection', function connection(ws) {
   });
 });
 
-console.log('WebSocket server running on port', port);
+console.log('WebSocket server running on port', socketPort);
 
 const rl = readline.createInterface({
   input: process.stdin,

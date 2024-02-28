@@ -1,7 +1,8 @@
 const WebSocket = require('ws');
 
-// const serverURL = "https://ccapi.567437965.xyz"
-const serverURL = "wss://ccapi.567437965.xyz/"
+const socketPort = 5000;
+const serverURL = "ws://localhost:" + socketPort + "/"
+// const serverURL = "wss://ccapi.567437965.xyz/"
 
 const ws = new WebSocket(serverURL);
 
