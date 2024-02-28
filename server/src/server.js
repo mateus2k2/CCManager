@@ -54,14 +54,9 @@
 
 
 
-
-const express = require('express');
-const http = require('http');
 const WebSocket = require('ws');
 
-const app = express();
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocket.Server({ port: 5001 }); // Create WebSocket server on port 8080
 
 let isClientConnected = false; // Flag to track if a client is already connected
 
@@ -73,7 +68,6 @@ wss.on('connection', (ws) => {
   }
 
   ws.on('message', (message) => {
-    console.log('Received message from client:', message);
     if (message === '123456789') {
       // If the received message is the authentication token, allow the connection
       isClientConnected = true;
@@ -89,10 +83,5 @@ wss.on('connection', (ws) => {
   });
 });
 
-app.get('/api', (req, res) => {
-  res.send('API endpoint');
-});
+console.log('WebSocket server running on port 5001');
 
-server.listen(5000, () => {
-  console.log('Server running on port 5000');
-});
