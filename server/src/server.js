@@ -107,7 +107,7 @@ let isClientConnected = false; // Flag to track if a client is already connected
 
 wss.on('connection', (ws) => {
   console.log('Client connected');
-  
+
   if (isClientConnected) {
     // If a client is already connected, reject new connection
     ws.close(1000, 'Only one connection allowed');
@@ -116,11 +116,9 @@ wss.on('connection', (ws) => {
 
   ws.on('message', (message) => {
     if (message === '123456789') {
-      // If the received message is the authentication token, allow the connection
       isClientConnected = true;
       ws.send('Authentication successful. You are connected.');
     } else {
-      // If the received message is not the authentication token, close the connection
       ws.close(1000, 'Authentication failed. Closing connection.');
     }
   });
