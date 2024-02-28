@@ -55,6 +55,7 @@ app.get('/api', async (req, res) => {
   } catch (error) {
     res.status(500).send('Error communicating with client');
   }
+  // return res.send('API is working');
 });
 
 server.listen(5000, () => {
