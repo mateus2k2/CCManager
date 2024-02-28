@@ -1,7 +1,7 @@
 const WebSocket = require('ws');
 const readline = require('readline');
 
-const port = 8585;
+const port = 8586;
 const wss = new WebSocket.Server({ port: port });
 
 wss.on('connection', function connection(ws) {
