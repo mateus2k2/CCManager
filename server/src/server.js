@@ -103,18 +103,19 @@ const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-let isClientConnected = false; // Flag to track if a client is already connected
+let isClientConnected = false;
 
 wss.on('connection', (ws) => {
   console.log('Client connected');
 
   if (isClientConnected) {
-    // If a client is already connected, reject new connection
     ws.close(1000, 'Only one connection allowed');
     return;
   }
 
   ws.on('message', (message) => {
+    console.log('Received message from client:', message);
+
     if (message === '123456789') {
       isClientConnected = true;
       ws.send('Authentication successful. You are connected.');
@@ -124,7 +125,7 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
-    isClientConnected = false; // Reset the connection flag when the client disconnects
+    isClientConnected = false;
   });
 });
 
