@@ -23,24 +23,29 @@ wss.on('connection', (ws) => {
 
     if (receivedMessage === '123456789') {
       connectedClient = ws;
+      console.log('Client authenticated');
       ws.send('Authenticated');
     } else {
       ws.close(1000, 'Closing');
     }
   });
 
-  ws.on('close', () => {
-    connectedClient = null;
-  });
+  // ws.on('close', () => {
+  //   console.log('Client disconnected');
+  //   connectedClient = null;
+  // });
 });
 
 app.get('/api', async (req, res) => {
+  console.log('API request received');
+  console.log('Connected client:', connectedClient);
   if (!connectedClient) {
     res.status(500).send('No client connected');
     return;
   }
 
   try {
+    console.log('energy');
     connectedClient.send('energy');
 
     const responsePromise = new Promise((resolve, reject) => {
