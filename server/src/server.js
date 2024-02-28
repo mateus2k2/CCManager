@@ -1,89 +1,7 @@
-// const express = require('express');
-// const http = require('http');
-// const WebSocket = require('ws');
-
-// const app = express();
-// const server = http.createServer(app);
-// const wss = new WebSocket.Server({ server });
-
-// let connectedClient = null;
-
-// wss.on('connection', (ws) => {
-//   console.log('Client connected');
-
-//   if (connectedClient) {
-//     ws.close(1000, 'Only one connection allowed');
-//     return;
-//   }
-
-//   ws.on('message', (message) => {
-//     const receivedMessage = message.toString();
-
-//     console.log('Received message from client:', receivedMessage);
-
-//     if (receivedMessage === '123456789') {
-//       connectedClient = ws;
-//       console.log('Client authenticated');
-//       ws.send('Authenticated');
-//     } else {
-//       ws.close(1000, 'Closing');
-//     }
-//   });
-
-//   // ws.on('close', () => {
-//   //   console.log('Client disconnected');
-//   //   connectedClient = null;
-//   // });
-// });
-
-// app.get('/api', async (req, res) => {
-//   console.log('API request received');
-//   console.log('Connected client:', connectedClient);
-//   if (!connectedClient) {
-//     res.status(500).send('No client connected');
-//     return;
-//   }
-
-//   try {
-//     console.log('energy');
-//     connectedClient.send('energy');
-
-//     const responsePromise = new Promise((resolve, reject) => {
-//       connectedClient.once('message', (message) => {
-//         resolve(message.toString());
-//       });
-//     });
-
-//     const response = await responsePromise;
-
-//     res.send('Response from client: ' + response);
-//   } catch (error) {
-//     res.status(500).send('Error communicating with client');
-//   }
-//   // return res.send('API is working');
-// });
-
-// server.listen(5000, () => {
-//   console.log('Server running on port 5000');
-// });
-
-
-
-
-
-// if I hava a aplication in node js express 
-
-// it has an endpoin called getData, this end point neads to put this data request in a Queeu with an ID
-
-// then there is another aplication in a nother lamguage there is going to keep checking the queeu for requests and then put the responses and another place
-
-// the endpoint getData need to wait for the response for the request with the respective ID to show up and the return that response
-
-// the getData end point should wait for the reponse to apear for a set amount of time then if that times runs out it return an error
-
 const express = require('express');
 const bodyParser = require('body-parser');
 const amqp = require('amqplib/callback_api');
+const axios = require('axios');
 
 const app = express();
 app.use(bodyParser.json());
@@ -99,15 +17,28 @@ amqp.connect('amqp://localhost', function(error0, connection) {
       throw error1;
     }
 
+    const exchange = 'requests_exchange';
     const queue = 'requests';
+
+    // Assert exchange and queue
+    channel.assertExchange(exchange, 'fanout', { durable: false });
     channel.assertQueue(queue, { durable: false });
+    channel.bindQueue(queue, exchange, '');
 
     // Endpoint to get requests from the queue
-    app.get('/getRequests', (req, res) => {
-      channel.consume(queue, function(msg) {
-        const requestData = JSON.parse(msg.content.toString());
-        res.json(requestData);
-      }, { noAck: true });
+    app.get('/getRequest', (req, res) => {
+      // Get the last request from the queue
+      channel.get(queue, { noAck: true }, function(err, msg) {
+        if (err) {
+          throw err;
+        }
+        if (msg !== false) {
+          const requestData = JSON.parse(msg.content.toString());
+          res.json({ requestData });
+        } else {
+          res.status(404).json({ message: 'No requests in the queue' });
+        }
+      });
     });
 
     // Endpoint to put response into the queue
@@ -115,8 +46,7 @@ amqp.connect('amqp://localhost', function(error0, connection) {
       const requestId = req.params.requestId;
       const responseData = req.body;
 
-      channel.assertQueue(queue + requestId, { durable: false });
-      channel.sendToQueue(queue + requestId, Buffer.from(JSON.stringify(responseData)));
+      channel.sendToQueue(queue, Buffer.from(JSON.stringify({ requestId, responseData })));
 
       res.json({ message: 'Response added to the queue' });
     });
@@ -126,12 +56,14 @@ amqp.connect('amqp://localhost', function(error0, connection) {
       const requestId = generateUniqueId(); // Implement your own ID generation logic
 
       // Put request data into the queue
-      channel.sendToQueue(queue, Buffer.from(JSON.stringify({ requestId, requestData: req.query })));
+      channel.publish(exchange, '', Buffer.from(JSON.stringify({ requestId, requestData: req.query })));
 
       // Wait for response
-      channel.consume(queue + requestId, function(msg) {
-        const responseData = JSON.parse(msg.content.toString());
-        res.json(responseData);
+      channel.consume(queue, function(msg) {
+        const { requestId: msgRequestId, responseData } = JSON.parse(msg.content.toString());
+        if (msgRequestId === requestId) {
+          res.json(responseData);
+        }
       }, { noAck: true });
 
       // Set timeout
@@ -142,8 +74,8 @@ amqp.connect('amqp://localhost', function(error0, connection) {
   });
 });
 
-app.listen(3000, () => {
-  console.log('Server is running on port 3000');
+app.listen(5000, () => {
+  console.log('Server is running on port 5000');
 });
 
 // Helper function to generate unique IDs
