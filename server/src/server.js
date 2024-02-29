@@ -7,6 +7,12 @@ const sqlite3 = require('sqlite3').verbose();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// const app = express();
+// const PORT = process.env.PORT || 5000;
+// const server = http.createServer(app); // Create HTTP server
+// const io = socketIo(server); // Attach socket.io to the HTTP server
+
+
 // Middleware for parsing JSON requests
 app.use(bodyParser.json());
 
@@ -88,58 +94,114 @@ app.post('/makeResponse/:id', (req, res) => {
   const currentDate = new Date().toISOString();
   const responseBody = req.body;
 
-  db.serialize(() => {
-    db.run(`INSERT INTO responses (request_id, date, body) VALUES (?, ?, ?)`, [requestId, currentDate, JSON.stringify(responseBody)], function(err) {
-      if (err) {
-        console.error('Error inserting response:', err.message);
-        res.status(500).json({ error: 'Internal server error' });
-      } else {
+  // Check if the request with the given ID exists
+  db.get(`SELECT * FROM requests WHERE id = ?`, [requestId], (err, row) => {
+    if (err) {
+      console.error('Error checking request:', err.message);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+
+    if (!row) {
+      console.error('Request not found');
+      return res.status(404).json({ error: 'Request not found' });
+    }
+
+    // If the request exists, proceed with inserting the response and marking the request as done
+    db.serialize(() => {
+      db.run(`INSERT INTO responses (request_id, date, body) VALUES (?, ?, ?)`, [requestId, currentDate, JSON.stringify(responseBody)], function(err) {
+        if (err) {
+          console.error('Error inserting response:', err.message);
+          return res.status(500).json({ error: 'Internal server error' });
+        }
+
         console.log('New response inserted with ID:', this.lastID);
+
         db.run(`UPDATE requests SET isDone = 1 WHERE id = ?`, [requestId], (err) => {
           if (err) {
             console.error('Error updating request:', err.message);
-            res.status(500).json({ error: 'Internal server error' });
-          } else {
-            console.log('Request marked as done with ID:', requestId);
-            res.status(200).json({ message: 'Response created successfully and request marked as done' });
+            return res.status(500).json({ error: 'Internal server error' });
           }
+
+          console.log('Request marked as done with ID:', requestId);
+          res.status(200).json({ message: 'Response created successfully and request marked as done' });
         });
-      }
+      });
     });
   });
 });
 
+
 // Endpoint to poll for data until response appears
-app.get('/getdataNow/:id', async (req, res) => {
+app.get('/getDataNow/:id', async (req, res) => {
   const requestId = req.params.id;
 
   // Polling interval (milliseconds)
   const pollingInterval = 1000;
 
-  const checkResponse = () => {
-    return new Promise((resolve, reject) => {
-      db.get(`SELECT * FROM responses WHERE request_id = ?`, [requestId], (err, row) => {
-        if (err) {
-          reject(err);
-        } else {
-          if (row) {
-            resolve(row);
-          } else {
-            setTimeout(checkResponse, pollingInterval);
-          }
-        }
-      });
-    });
-  };
+  // Check if the request with the given ID exists
+  db.get(`SELECT * FROM requests WHERE id = ?`, [requestId], async (err, row) => {
+    if (err) {
+      console.error('Error checking request:', err.message);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
 
-  try {
-    const response = await checkResponse();
-    res.status(200).json(response);
-  } catch (err) {
-    console.error('Error polling for response:', err.message);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+    if (!row) {
+      console.error('Request not found');
+      return res.status(404).json({ error: 'Request not found' });
+    }
+
+    // If the request exists, start polling for the response
+    const checkResponse = () => {
+      return new Promise((resolve, reject) => {
+        db.get(`SELECT * FROM responses WHERE request_id = ?`, [requestId], (err, row) => {
+          if (err) {
+            reject(err);
+          } else {
+            if (row) {
+              resolve(row);
+            } else {
+              setTimeout(checkResponse, pollingInterval);
+            }
+          }
+        });
+      });
+    };
+
+    try {
+      const response = await checkResponse();
+      res.status(200).json(response);
+    } catch (err) {
+      console.error('Error polling for response:', err.message);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 });
+
+
+// // WebSocket logic
+// io.on('connection', (socket) => {
+//   console.log('Client connected');
+
+//   // Listen for client requests to subscribe to a particular request ID
+//   socket.on('subscribeToRequest', (requestId) => {
+//     // Start listening to changes in the responses table for the given request ID
+//     const query = db.prepare(`SELECT * FROM responses WHERE request_id = ?`);
+//     query.each(requestId, (err, row) => {
+//       if (err) {
+//         console.error('Error fetching response:', err.message);
+//       } else {
+//         // Send the response to the client
+//         socket.emit('response', row);
+//       }
+//     });
+//     query.finalize();
+//   });
+
+//   // Handle client disconnection
+//   socket.on('disconnect', () => {
+//     console.log('Client disconnected');
+//   });
+// });
 
 
 // Start server
