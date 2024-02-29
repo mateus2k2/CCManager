@@ -151,7 +151,7 @@ app.get('/getDataNow/:id', async (req, res) => {
     }
 
     // If the request exists, start polling for the response
-    const checkResponse = () => {
+    const checkResponse = async () => {
       return new Promise((resolve, reject) => {
         db.get(`SELECT * FROM responses WHERE request_id = ?`, [requestId], (err, row) => {
           if (err) {
@@ -176,6 +176,7 @@ app.get('/getDataNow/:id', async (req, res) => {
     }
   });
 });
+
 
 
 // // WebSocket logic
