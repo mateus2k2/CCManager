@@ -1,76 +1,121 @@
-// index.js
-
+// Import required modules
 const express = require('express');
-const bodyParser = require('body-parser');
+const { Pool, Client } = require('pg');
 
+// Create a PostgreSQL pool
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'postgres',
+  password: 'postgres',
+  port: 5432,
+});
+
+// Create a PostgreSQL client for listening to notifications
+const client = new Client({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'postgres',
+  password: 'postgres',
+  port: 5432,
+});
+client.connect();
+
+// Create Express application
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// Middleware for parsing JSON requests
-app.use(bodyParser.json());
+// Middleware to parse JSON bodies
+app.use(express.json());
 
-const requests = [];
-const responses = [];
+// Function to create tables if they don't exist
+async function createTablesIfNotExist() {
+  try {
+    // Example table creation query
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS requests (
+        id SERIAL PRIMARY KEY,
+        date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        body TEXT NOT NULL,
+        isDone INTEGER DEFAULT 0
+      );
 
-// Endpoint to insert a new record into requests table
-app.get('/getData/:id', (req, res) => {
-  const { id } = req.params;
+      CREATE TABLE IF NOT EXISTS responses (
+            id SERIAL PRIMARY KEY,
+            request_id INTEGER NOT NULL,
+            date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            body TEXT NOT NULL,
+            FOREIGN KEY(request_id) REFERENCES requests(id)
+      );
+    `);
 
-  requests.push({ id, date: new Date(), body: 'some data', isDone: false });
+    console.log('Tables created successfully or already exist.');
+  } catch (error) {
+    console.error('Error creating tables:', error);
+  }
+}
 
-  let response = null;
-  let found = false;
-  while (!found) {
-    response = responses.find((response) => response.id === id);
-    console.log('response:', response);
-    if (response) {
-      found = true;
-    } else {
-      setTimeout(() => {}, 1000);
+// Create tables at server startup
+createTablesIfNotExist();
+
+// Endpoint to add a line to the table
+app.post('/makeResponse/:id', async (req, res) => {
+  try {
+    const requestId = req.params.id;
+    const currentDate = new Date().toISOString();
+    const responseBody = req.body;
+
+    console.log('requestId:', requestId);
+
+    // check if there is a request not done with the same id
+    const request = await pool.query('SELECT * FROM requests WHERE id = $1 AND isDone = 0', [requestId]);
+    if (request.rows.length === 0) {
+      res.status(404).send('No pending requests found');
+      return;
     }
+
+    await pool.query(`INSERT INTO responses (request_id, date, body) VALUES ($1, $2, $3)`, [requestId, currentDate, JSON.stringify(responseBody)]);
+
+    // Notify the 'response_added' channel
+    await pool.query('NOTIFY response_added');
+    
+    res.status(201).send('Line added successfully');
+  } catch (error) {
+    console.error('Error adding line:', error);
+    res.status(500).send('Error adding line');
   }
-  res.json(response);
-
-  // console.log('requests:', requests);
-  // res.sendStatus(200)
-
 });
 
-// Endpoint to get the oldest request that is not done
-app.get('/getRequest', (req, res) => {
-  const request = requests.find((request) => !request.isDone);
-  if (request) {
-    res.json(request);
-  } else {
-    res.status(404).send('No request found');
+// Endpoint to wait for a specific line in the table
+app.get('/makeRequest', async (req, res) => {
+  try {
+    const currentDate = new Date().toISOString();
+    const requestBody = req.body;
+
+    const insertedRequest = await pool.query('INSERT INTO requests (date, body, isDone) VALUES ($1, $2, $3 ) RETURNING *', [currentDate, JSON.stringify(requestBody), 0]);
+    const requestID = insertedRequest.rows[0].id;
+
+    // Listen for notifications on 'response_added' channel
+    client.on('notification', async (msg) => {
+      if (msg.channel === 'response_added') {
+        const response = await pool.query('SELECT * FROM responses WHERE request_id = $1', [requestID]);
+        if (response.rows.length > 0) {
+          res.json(response.rows);
+          client.end();
+        }
+      }
+    });
+
+    // Start listening
+    await client.query('LISTEN response_added');
+
+  } catch (error) {
+    console.error('Error waiting for line:', error);
+    res.status(500).send('Error waiting for line');
   }
-  
 });
 
-// Endpoint to make a response for a request
-app.post('/makeResponse/:id', (req, res) => {
-  const { id } = req.params;
-  const { data } = req.body;
-
-  //find the request in the requests array
-  const request = requests.find((request) => request.id === id);
-  console.log(requests);
-  if (request) {
-    //add the response to the responses array
-    responses.push({ id, date: new Date(), body: data });
-    //mark the request as done
-    request.isDone = true;
-    res.status(200).send('Response added successfully');
-  } 
-  else {
-    res.status(404).send('Request not found');
-  }
-
-});
-
-
-// Start server
+// Start the Express server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
-
