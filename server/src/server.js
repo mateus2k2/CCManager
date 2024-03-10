@@ -42,7 +42,7 @@ async function createTablesIfNotExist() {
       CREATE TABLE IF NOT EXISTS requests (
         id SERIAL PRIMARY KEY,
         date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        body TEXT NOT NULL,
+        body JSONB NOT NULL,
         isDone INTEGER DEFAULT 0
       );
       
@@ -50,7 +50,7 @@ async function createTablesIfNotExist() {
         id SERIAL PRIMARY KEY,
         request_id INTEGER NOT NULL,
         date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        body TEXT NOT NULL,
+        body JSONB NOT NULL,
         FOREIGN KEY(request_id) REFERENCES requests(id)
       );
     `);
@@ -73,26 +73,22 @@ app.post('/makeResponse/:id', async (req, res) => {
     const currentDate = new Date().toISOString();
     const responseBody = req.body;
 
-    console.log('requestId:', requestId);
-
-    // check if there is a request not done with the same id
     const request = await pool.query('SELECT * FROM requests WHERE id = $1 AND isDone = 0', [requestId]);
     if (request.rows.length === 0) {
-      res.status(404).send('No pending requests found');
+      res.status(404).send(`Request with ID: ${requestId} Not Found`);
       return;
     }
 
     await pool.query(`INSERT INTO responses (request_id, date, body) VALUES ($1, $2, $3)`, [requestId, currentDate, JSON.stringify(responseBody)]);
-    // Mark the request as done
     await pool.query('UPDATE requests SET isDone = 1 WHERE id = $1', [requestId]);
 
-    // Notify the 'response_added' channel
     await pool.query('NOTIFY response_added');
     
-    res.status(201).send('Line added successfully');
-  } catch (error) {
-    console.error('Error adding line:', error);
-    res.status(500).send('Error adding line');
+    res.status(201).send(`Sucess on response : ${requestId}`);
+  } 
+  catch (error) {
+    console.error(`Error on response: ${requestId}`, error);
+    res.status(500).send(`Error on response: ${requestId}`, error);
   }
 });
 
@@ -122,8 +118,8 @@ app.get('/makeRequest', async (req, res) => {
 
   } 
   catch (error) {
-    console.error('Error waiting for line:', error);
-    res.status(500).send('Error waiting for line');
+    console.error(`Error waiting For request: ${requestId}`, error);
+    res.status(500).send(`Error waiting For request: ${requestId}`);
   }
 });
 
