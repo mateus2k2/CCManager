@@ -1,8 +1,14 @@
-// Import required modules
+// --------------------------------------------------------------------
+// IMPORTS
+// --------------------------------------------------------------------
+
 const express = require('express');
 const { Pool, Client } = require('pg');
 
-// Create a PostgreSQL pool
+// --------------------------------------------------------------------
+// DB CONFIG AND CONECTIONS
+// --------------------------------------------------------------------
+
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
@@ -11,7 +17,6 @@ const pool = new Pool({
   port: 5432,
 });
 
-// Create a PostgreSQL client for listening to notifications
 const client = new Client({
   user: 'postgres',
   host: 'localhost',
@@ -19,15 +24,17 @@ const client = new Client({
   password: 'postgres',
   port: 5432,
 });
+
 client.connect();
 
-// Create Express application
+// --------------------------------------------------------------------
+// EXPRESS CONFIGURATION
+// --------------------------------------------------------------------
+
 const app = express();
 
-// Middleware to parse JSON bodies
 app.use(express.json());
 
-// Function to create tables if they don't exist
 async function createTablesIfNotExist() {
   try {
     // Example table creation query
@@ -54,10 +61,12 @@ async function createTablesIfNotExist() {
   }
 }
 
-// Create tables at server startup
 createTablesIfNotExist();
 
-// Endpoint to add a line to the table
+// --------------------------------------------------------------------
+// makeResponse
+// --------------------------------------------------------------------
+
 app.post('/makeResponse/:id', async (req, res) => {
   try {
     const requestId = req.params.id;
@@ -87,7 +96,10 @@ app.post('/makeResponse/:id', async (req, res) => {
   }
 });
 
-// Endpoint to wait for a specific line in the table
+// --------------------------------------------------------------------
+// makeRequest
+// --------------------------------------------------------------------
+
 app.get('/makeRequest', async (req, res) => {
   try {
     const currentDate = new Date().toISOString();
@@ -96,7 +108,6 @@ app.get('/makeRequest', async (req, res) => {
     const insertedRequest = await pool.query('INSERT INTO requests (date, body, isDone) VALUES ($1, $2, $3 ) RETURNING *', [currentDate, JSON.stringify(requestBody), 0]);
     const requestID = insertedRequest.rows[0].id;
 
-    // Listen for notifications on 'response_added' channel
     client.on('notification', async (msg) => {
       if (msg.channel === 'response_added') {
         const response = await pool.query('SELECT * FROM responses WHERE request_id = $1', [requestID]);
@@ -107,7 +118,6 @@ app.get('/makeRequest', async (req, res) => {
       }
     });
 
-    // Start listening
     await client.query('LISTEN response_added');
 
   } 
@@ -116,6 +126,10 @@ app.get('/makeRequest', async (req, res) => {
     res.status(500).send('Error waiting for line');
   }
 });
+
+// --------------------------------------------------------------------
+// getOldestRequest
+// --------------------------------------------------------------------
 
 app.get('/getOldestRequest', async (req, res) => {
   
@@ -131,8 +145,11 @@ app.get('/getOldestRequest', async (req, res) => {
 
 });
 
-// Start the Express server
-const PORT = process.env.PORT || 5000;
+// --------------------------------------------------------------------
+// Server
+// --------------------------------------------------------------------
+
+const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
