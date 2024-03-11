@@ -37,7 +37,6 @@ app.use(express.json());
 
 async function createTablesIfNotExist() {
   try {
-    // Example table creation query
     await pool.query(`
       CREATE TABLE IF NOT EXISTS requests (
         id SERIAL PRIMARY KEY,
