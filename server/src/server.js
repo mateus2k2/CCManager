@@ -1,3 +1,5 @@
+// sudo docker run --name postgres -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres
+
 // --------------------------------------------------------------------
 // IMPORTS
 // --------------------------------------------------------------------
@@ -67,10 +69,14 @@ createTablesIfNotExist();
 // --------------------------------------------------------------------
 
 app.post('/makeResponse/:id', async (req, res) => {
+  console.log(`Making Response: ${req.params.id}`)
+
   try {
     const requestId = req.params.id;
     const currentDate = new Date().toISOString();
     const responseBody = req.body;
+
+    // console.log(responseBody)
 
     const request = await pool.query('SELECT * FROM requests WHERE id = $1 AND isDone = 0', [requestId]);
     if (request.rows.length === 0) {
@@ -84,6 +90,8 @@ app.post('/makeResponse/:id', async (req, res) => {
     await pool.query('NOTIFY response_added');
     
     res.status(201).send(`Sucess on response : ${requestId}`);
+    console.log(`Response OK: ${req.params.id}`)
+
   } 
   catch (error) {
     console.error(`Error on response: ${requestId}`, error);
@@ -96,29 +104,32 @@ app.post('/makeResponse/:id', async (req, res) => {
 // --------------------------------------------------------------------
 
 app.get('/makeRequest', async (req, res) => {
+  console.log(`Making Request`);
+
   try {
     const currentDate = new Date().toISOString();
     const requestBody = req.body;
 
-    const insertedRequest = await pool.query('INSERT INTO requests (date, body, isDone) VALUES ($1, $2, $3 ) RETURNING *', [currentDate, JSON.stringify(requestBody), 0]);
-    const requestID = insertedRequest.rows[0].id;
+    const insertedRequest = await pool.query('INSERT INTO requests (date, body, isDone) VALUES ($1, $2, $3) RETURNING *', [currentDate, JSON.stringify(requestBody), 0]);
+    const requestId = insertedRequest.rows[0].id;
 
-    client.on('notification', async (msg) => {
+    const notificationListener = async (msg) => {
       if (msg.channel === 'response_added') {
-        const response = await pool.query('SELECT * FROM responses WHERE request_id = $1', [requestID]);
+        const response = await pool.query('SELECT * FROM responses WHERE request_id = $1', [requestId]);
         if (response.rows.length > 0) {
           res.json(response.rows);
-          client.end();
+          client.removeListener('notification', notificationListener);
         }
       }
-    });
+    };
 
+    client.on('notification', notificationListener);
     await client.query('LISTEN response_added');
 
-  } 
-  catch (error) {
-    console.error(`Error waiting For request: ${requestId}`, error);
-    res.status(500).send(`Error waiting For request: ${requestId}`);
+    console.log(`Request OK`);
+  } catch (error) {
+    console.error(`Error waiting for request: `, error);
+    res.status(500).send(`Error waiting for request: `);
   }
 });
 
@@ -127,6 +138,7 @@ app.get('/makeRequest', async (req, res) => {
 // --------------------------------------------------------------------
 
 app.get('/getOldestRequest', async (req, res) => {
+  // console.log(`Geting Oldest request`)
   
   try {
     const request = await pool.query('SELECT * FROM requests WHERE isDone = 0 ORDER BY date LIMIT 1');
