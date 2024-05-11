@@ -1,2 +1,2 @@
 shell.run("clear")
-shell.run("./CC/src/mainSrc.lua")
+shell.run("./CC/mainSrc.lua")
