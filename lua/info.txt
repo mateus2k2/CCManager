@@ -1,1 +1,2 @@
 wget run https://basalt.madefor.cc/install.lua packed Modules/basalt.lua master
+wget run https://raw.githubusercontent.com/Pyroxenium/basalt-docs/main/install.lua
