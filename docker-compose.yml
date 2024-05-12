@@ -21,7 +21,7 @@ services:
     environment:
       NODE_ENV: production
     ports:
-      - "3001:3001"
+      - "5015:5015"
 
   frontend:
     build: ./frontend
