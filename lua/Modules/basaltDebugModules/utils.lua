@@ -1,4 +1,4 @@
-local tHex = require("basaltDebugModules/tHex")
+local tHex = require("/Modules/basaltDebugModules/tHex")
 local sub,find,reverse,rep,insert,len = string.sub,string.find,string.reverse,string.rep,table.insert,string.len
 
 local function splitString(str, delimiter)
