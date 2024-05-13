@@ -6,7 +6,8 @@
   "scripts": {
     "go": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "mini": "node minify/minifyLua.js"
   },
   "author": "",
   "license": "ISC",
@@ -14,6 +15,7 @@
     "amqplib": "^0.10.3",
     "axios": "^1.6.7",
     "express": "^4.18.2",
+    "luamin": "^1.0.4",
     "pg": "^8.11.3",
     "sqlite3": "^5.1.7",
     "ws": "^8.16.0"
