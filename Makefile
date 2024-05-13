@@ -3,13 +3,13 @@
 # ----------------------------------------
 
 gitLuaMini:
-	clear && cd ./../CCManagerLuaMini && git add . && git commit -m "update" | true  && git push origin master
+	clear && echo "gitLuaMini" && cd ./../CCManagerLuaMini && git add . && git commit -m "update" | true  && git push origin master
 
 gitLua:
-	clear && cd ./../CCManagerLua && git add . && git commit -m "update" | true  && git push origin master
+	clear && echo "gitLua" && cd ./../CCManagerLua && git add . && git commit -m "update" | true  && git push origin master
 
 gitWeb:
-	clear && cd . && git add . && git commit -m "update" | true && git push origin master
+	clear && echo "gitWeb" && cd . && git add . && git commit -m "update" | true && git push origin master
 
 # ----------------------------------------
 # --NPM
