@@ -1,5 +1,6 @@
-goLua:
-	clear && cd ./goMinify && npm run minify && cd .. && make gitLua | true && make gitLuaMini | true
+# ----------------------------------------
+# --GIT
+# ----------------------------------------
 
 gitLuaMini:
 	clear && cd ./../CCManagerLuaMini && git add . && git commit -m "update" && git push origin master
@@ -10,12 +11,23 @@ gitLua:
 gitWeb:
 	clear && cd . && git add . && git commit -m "update" && git push origin master
 
+# ----------------------------------------
+# --NPM
+# ----------------------------------------
+
 startBack:
 	clear && cd backend && npm run start
 
 startFront:
 	clear && cd frontend && npm run start
-	
+
+startMinify:
+	clear && cd goMinify && npm run minify
+
+# ----------------------------------------
+# --DB
+# ----------------------------------------
+
 removeDB:
 	clear && docker stop postgres && docker rm postgres
 
@@ -24,3 +36,10 @@ startDB:
 
 createDB:
 	clear && docker run --name postgres -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres 
+
+# ----------------------------------------
+# --GO
+# ----------------------------------------
+
+goLua:
+	clear && make startMinify && make gitLua | true && make gitLuaMini | true
