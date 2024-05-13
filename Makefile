@@ -1,3 +1,9 @@
+goLua:
+	clear && cd ./goMinify && npm run minify && cd .. && make gitLua | true && make gitLuaMini | true
+
+gitLuaMini:
+	clear && cd ./../CCManagerLuaMini && git add . && git commit -m "update" && git push origin master
+
 gitLua:
 	clear && cd ./../CCManagerLua && git add . && git commit -m "update" && git push origin master
 

@@ -2,7 +2,7 @@ const luamin = require('luamin');
 const fs = require('fs');
 const path = require('path');
 
-function copyFiles(sourceDir, destDir, transformFunction, ignoredDirectories = []) {
+function copyFiles(sourceDir, destDir, transformFunction, ignoredDirectories = [], copyOnlyDirectories = []) {
     // Create destination directory if it doesn't exist
     if (!fs.existsSync(destDir)) {
         fs.mkdirSync(destDir, { recursive: true });
@@ -32,10 +32,18 @@ function copyFiles(sourceDir, destDir, transformFunction, ignoredDirectories = [
                         console.log(`Skipping directory: ${sourceFile}`);
                         return;
                     }
+                    // Check if the directory should be copied without changes
+                    if (copyOnlyDirectories.includes(file)) {
+                        console.log(`Copying directory without changes: ${sourceFile}`);
+                        fs.mkdirSync(destFile, { recursive: true });
+                        copyFiles(sourceFile, destFile, transformFunction, ignoredDirectories, copyOnlyDirectories);
+                        return;
+                    }
                     // Recursively copy subdirectory
-                    copyFiles(sourceFile, destFile, transformFunction, ignoredDirectories);
+                    copyFiles(sourceFile, destFile, transformFunction, ignoredDirectories, copyOnlyDirectories);
                 } else {
                     // Read and apply transformation function to file content
+                    console.log(sourceFile + " -> " + destFile)
                     fs.readFile(sourceFile, 'utf8', (err, data) => {
                         if (err) {
                             console.error('Error reading file:', err);
@@ -65,7 +73,10 @@ const sourceDirectory = '/home/mateus/WSL/PROJETOS/minecraft/CCManagerLua';
 const destinationDirectory = '/home/mateus/WSL/PROJETOS/minecraft/CCManagerLuaMini';
 
 // Define directories to be ignored
-const ignoredDirectories = ['Logs'];
+const ignoredDirectories = ['.git'];
+
+// Define directories to be copied without changes
+const copyOnlyDirectories = ['Logs'];
 
 // Define your transformation function here
 function transformFunction(data) {
@@ -73,4 +84,4 @@ function transformFunction(data) {
     return luamin.minify(data);
 }
 
-copyFiles(sourceDirectory, destinationDirectory, transformFunction, ignoredDirectories);
+copyFiles(sourceDirectory, destinationDirectory, transformFunction, ignoredDirectories, copyOnlyDirectories);

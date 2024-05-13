@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "minify": "node minifyLua.js"
+  },
+  "dependencies": {
+    "luamin": "^1.0.4"
+  }
+}
