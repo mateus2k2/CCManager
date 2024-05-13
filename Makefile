@@ -3,13 +3,13 @@
 # ----------------------------------------
 
 gitLuaMini:
-	clear && cd ./../CCManagerLuaMini && git add . && git commit -m "update" && git push origin master
+	clear && cd ./../CCManagerLuaMini && git add . && git commit -m "update" | true  && git push origin master
 
 gitLua:
-	clear && cd ./../CCManagerLua && git add . && git commit -m "update" && git push origin master
+	clear && cd ./../CCManagerLua && git add . && git commit -m "update" | true  && git push origin master
 
 gitWeb:
-	clear && cd . && git add . && git commit -m "update" && git push origin master
+	clear && cd . && git add . && git commit -m "update" | true && git push origin master
 
 # ----------------------------------------
 # --NPM
@@ -42,4 +42,4 @@ createDB:
 # ----------------------------------------
 
 goLua:
-	clear && make startMinify && make gitLua | true && make gitLuaMini | true
+	clear && make startMinify && make gitLua && make gitLuaMini
