@@ -1,7 +1,6 @@
 // server.js
 
-const app = require('./express-config');
-const createTablesIfNotExist = require('./create-tables');
+const app = require('./app');
 const routes = require('./routes');
 
 app.use(routes);
