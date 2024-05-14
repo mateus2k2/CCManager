@@ -1,6 +1,6 @@
 // create-tables.js
 
-const { pool } = require('./db');
+const { pool, client, report } = require('./db');
 
 async function createTablesIfNotExist() {
   try {

@@ -2,7 +2,7 @@
 
 const express = require('express');
 const authenticateToken = require('./authMiddleware');
-const { pool, client } = require('./db');
+const { pool, client, report } = require('./db');
 
 const router = express.Router();
 router.use(authenticateToken);

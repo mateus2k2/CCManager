@@ -35,7 +35,8 @@ startDB:
 	clear && docker start postgres 
 
 createDB:
-	clear && docker run --name postgres -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres 
+	clear && docker run --name postgres -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres && echo "Creating DB" && sleep 5 && docker exec -it postgres createdb -U postgres requests && docker exec -it postgres createdb -U postgres reports
+
 
 # ----------------------------------------
 # --GO
