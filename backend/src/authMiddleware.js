@@ -13,6 +13,3 @@ function authenticateToken(req, res, next) {
 }
 
 module.exports = authenticateToken;
-
-// curl -X GET http://localhost:5015/status \
-// -H "Authorization: token"
