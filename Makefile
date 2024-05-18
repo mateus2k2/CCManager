@@ -18,6 +18,9 @@ gitWeb:
 startBack:
 	clear && cd backend && npm run start
 
+startBackSqlite:
+	clear && cd backend && npm run sqlite
+
 startFront:
 	clear && cd frontend && npm run start
 
