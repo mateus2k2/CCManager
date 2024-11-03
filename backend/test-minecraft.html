@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Client</title>
+</head>
+
+<style>
+/* Basic page styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Title styling */
+h1 {
+    margin-top: 20px;
+    color: #444;
+    font-size: 24px;
+}
+
+/* Status styling */
+p {
+    font-size: 18px;
+}
+
+#status {
+    font-weight: bold;
+    color: #ff3b30;
+}
+
+/* Change color when connected */
+#status.connected {
+    animation: statusConnected 1s forwards;
+}
+
+#status:not(.connected) {
+    /* run backwards */
+    animation: statusDisconnected 1s forwards;
+}
+
+/* Process list container */
+.process-list {
+    width: 80%;
+    max-width: 600px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Request wrapper */
+.process-warper {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Received request */
+.process-warper p:first-child {
+    font-weight: bold;
+    color: #333;
+}
+
+/* Response request styling */
+.process-warper p:last-child {
+    margin-top: 8px;
+    color: #888;
+    font-style: italic;
+}
+
+/* Status color animation */
+@keyframes statusConnected {
+    from { color: currentColor; }
+    to { color: #34c759; }
+}
+
+@keyframes statusDisconnected {
+    from { color: currentColor; }
+    to { color: #ff3b30; }
+}
+
+
+</style>
+
+<body>
+    <h1>Client 2: WebSocket Client</h1>
+    <p>Status: <span id="status">Not Connected</span></p>
+    <div class="process-list"></div>
+
+    <script>
+        const processListElem = document.querySelector('.process-list');
+        const statusElem = document.getElementById('status');
+
+        // Connect to WebSocket server
+        const ws = new WebSocket('ws://localhost:3000');
+
+        ws.onopen = () => {
+            statusElem.classList.add('connected');
+            statusElem.textContent = "Connected";
+        };
+
+        ws.onmessage = (event) => {
+            const waperDiv = document.createElement('div');
+            waperDiv.classList.add('process-warper');
+            const receivedRequestElem = document.createElement('p');
+            const responseSentElem = document.createElement('p');
+            waperDiv.appendChild(receivedRequestElem);
+            waperDiv.appendChild(responseSentElem);
+            processListElem.appendChild(waperDiv);
+
+            const data = JSON.parse(event.data);
+            const { id, request } = data;
+
+            receivedRequestElem.textContent = request.message;
+
+            let randondomTime = Math.floor(Math.random() * 5000) + 1000;
+            setTimeout(() => {
+                const responseRequest = `Received and processed: ${id}`;
+                ws.send(JSON.stringify({ id, response: responseRequest }));
+                responseSentElem.textContent = responseRequest;
+            }, randondomTime);
+
+        };
+
+        ws.onclose = () => {
+            statusElem.textContent = "Disconnected";
+            statusElem.classList.remove('connected');
+        };
+
+        ws.onerror = (error) => {
+            statusElem.textContent = "Error: " + error.request;
+        };
+    </script>
+</body>
+
+</html>

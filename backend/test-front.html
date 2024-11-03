@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>POST Request Client</title>
+    <style>
+        /* Basic page styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Title styling */
+        h1 {
+            margin-top: 20px;
+            color: #444;
+            font-size: 24px;
+        }
+
+        /* Input field styling */
+        input[type="text"] {
+            width: 100%;
+            max-width: 400px; /* Limit width */
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #007BFF; /* Focus color */
+            outline: none;
+        }
+
+        /* Button styling */
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF; /* Button color */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3; /* Darker shade on hover */
+            transform: translateY(-2px); /* Lift effect */
+        }
+
+        /* Process list container */
+        #requestList {
+            width: 80%;
+            max-width: 600px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Request wrapper */
+        .process-wrapper {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Sent request styling */
+        .process-wrapper .sent {
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Response request styling */
+        .process-wrapper .response {
+            margin-top: 8px;
+            color: #888;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Client 1: Send Request to WebSocket Client</h1>
+    <input type="text" id="request" placeholder="Enter your request">
+    <button onclick="sendRequest()">Send Request</button>
+
+    <ul id="requestList"></ul> <!-- List to display requests and responses -->
+
+    <script>
+        const list = document.getElementById('requestList');
+        async function sendRequest() {
+            const request = document.getElementById('request').value;
+            if (!request) {
+                alert("Please enter a request");
+                return;
+            }
+
+            try {
+                // Create a wrapper for sent request and response
+                const requestWrapper = document.createElement('div');
+                requestWrapper.classList.add('process-wrapper');
+                
+                const requestItem = document.createElement('p');
+                requestItem.classList.add('sent');
+                requestItem.textContent = 'Sent: ' + request;
+                requestWrapper.appendChild(requestItem);
+                
+                list.appendChild(requestWrapper);
+
+                const response = await fetch('http://localhost:3000/sendRequest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: request })
+                });
+                const data = await response.json();
+
+                // Create paragraph for response
+                const responseItem = document.createElement('p');
+                responseItem.classList.add('response');
+                responseItem.textContent = 'Response from WebSocket Client: ' + data.response;
+                requestWrapper.appendChild(responseItem);
+                
+                // Clear input field
+                document.getElementById('request').value = '';
+
+            } catch (error) {
+                const errorItem = document.createElement('li');
+                errorItem.textContent = 'Error: ' + error.request;
+                list.appendChild(errorItem);
+            }
+        }
+    </script>
+</body>
+</html>

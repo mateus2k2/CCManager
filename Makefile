@@ -16,10 +16,7 @@ gitWeb:
 # ----------------------------------------
 
 startBack:
-	clear && cd backend && npm run start
-
-startBackSqlite:
-	clear && cd backend && npm run sqlite
+	clear && cd backend && node server.js
 
 startFront:
 	clear && cd frontend && npm run start
@@ -27,21 +24,6 @@ startFront:
 startMinify:
 	clear && cd goMinify && npm run minify
 
-# ----------------------------------------
-# --DB
-# ----------------------------------------
-
-removeDB:
-	clear && docker stop postgres && docker rm postgres
-
-startDB:
-	clear && docker start postgres 
-
-createDB:
-	clear && docker run --name postgres -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres && echo "Creating DB" && sleep 5 && docker cp init.sql postgres:/init.sql && docker exec -it postgres psql -U postgres -d postgres -f init.sql
-
-updateDB:
-	clear && docker cp init.sql postgres:/init.sql && docker exec -it postgres psql -U postgres -d postgres -f init.sql
 
 # ----------------------------------------
 # --GO

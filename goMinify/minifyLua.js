@@ -69,8 +69,8 @@ function copyFiles(sourceDir, destDir, transformFunction, ignoredDirectories = [
 }
 
 // Example usage:
-const sourceDirectory = '/home/mateus/WSL/PROJETOS/minecraft/CCManagerLua';
-const destinationDirectory = '/home/mateus/WSL/PROJETOS/minecraft/CCManagerLuaMini';
+const sourceDirectory = './../../CCManagerLua';
+const destinationDirectory = './../../CCManagerLuaMini';
 
 // Define directories to be ignored
 const ignoredDirectories = ['.git'];

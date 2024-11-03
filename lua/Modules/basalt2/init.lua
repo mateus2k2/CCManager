@@ -1,1 +1,0 @@
-local _b={...}local ab=_b[1]or"basalt"local bb=package.path local cb="path;/path/?.lua;/path/?/init.lua;"local db=cb:gsub("path",ab) local _c=cb:gsub("path",ab.."/elements")local ac=cb:gsub("path",ab.."/extensions")local bc=cb:gsub("path",ab.. "/libraries")package.path=bb..db.._c.. ac..bc.."rom/?" local cc=require("main")package.path=bb;return cc

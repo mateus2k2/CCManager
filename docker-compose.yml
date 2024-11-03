@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  postgres:
+  postgres-db:
     image: postgres:latest
     restart: always
     environment:
@@ -13,7 +13,7 @@ services:
     volumes:
       - ./postgres_data:/var/lib/postgresql/data
 
-  backend:
+  node-backend:
     build: ./backend
     restart: always
     depends_on:
@@ -23,7 +23,7 @@ services:
     ports:
       - "5015:5015"
 
-  frontend:
+  liferay-frontend:
     build: ./frontend
     restart: always
     ports:
